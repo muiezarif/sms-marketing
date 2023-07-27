@@ -1,0 +1,93 @@
+import mongoose from "mongoose";
+
+const {Schema} = mongoose
+
+const UserSchema = new mongoose.Schema(
+{
+    username:{
+        type:String,
+        required:true,
+        unique:true
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true
+    },
+    country:{
+        type:String,
+        default:""
+    },
+    img:{
+        type:String,
+        default:""
+    },
+    img_path:{
+        type:String,
+        default:""
+    },
+    city:{
+        type:String,
+    },
+    phone:{
+        type:String,
+        required:true
+    },
+    customer_id:{
+        type:String,
+        default:""
+    },
+    password:{
+        type:String,
+        required:true
+    },
+    twilio_sub_account:{
+        type:String,
+        default:""
+    },
+    twilio_phone_number:{
+        type:String,
+        default:""
+    },
+    twilio_phone_subscribed:{
+        type:Boolean,
+        default:false
+    },
+    available_sms:{
+        type:Number,
+        default:0
+    },
+    isSubscribed:{
+        type:Boolean,
+        default:false
+    },
+    twitter_url:{
+        type:String,
+        default:""
+    },
+    insta_url:{
+        type:String,
+        default:""
+    },
+    shop_url:{
+        type:String,
+        default:""
+    },
+    youtube_url:{
+        type:String,
+        default:""
+    },
+    tiktok_url:{
+        type:String,
+        default:""
+    },
+    fp:{
+        type:String,
+        default:""
+    }
+},
+{
+    timestamps:true
+});
+
+export default mongoose.model("User",UserSchema)
