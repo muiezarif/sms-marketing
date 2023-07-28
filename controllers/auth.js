@@ -7,11 +7,13 @@ import Stripe from "stripe";
 import twilio from "twilio"
 import fs from "fs"
 import path,{dirname,join} from "path";
+import dotenv from "dotenv"
+dotenv.config();
 // const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
 // const stripe = Stripe("sk_live_OKIox1szlbVdrY8ODbX62vf900FYE9MyGb")
-const stripe = Stripe("sk_test_4CgRjsXz5H9ntyJSCZ7bCC2400JmmfIpy0")
-const accountSid = 'AC2f28d3f2d95a1a3475e346758469ed19';
-const authToken = '059773b0fed00286d9cd155b261e6815';
+const stripe = Stripe(process.env.STRIPE_TEST_SECRET_KEY)
+const accountSid = process.env.TWILIO_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = twilio(accountSid, authToken);
 //q1034412@gmail.com
 //yoyo@1234
