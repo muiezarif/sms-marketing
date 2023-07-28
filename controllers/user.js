@@ -14,9 +14,9 @@ import dotenv from "dotenv"
 dotenv.config();
 // const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
 // const stripe = Stripe("sk_live_OKIox1szlbVdrY8ODbX62vf900FYE9MyGb")
-const stripe = Stripe(proccess.env.STRIPE_TEST_SECRET_KEY)
-const accountSid = proccess.env.TWILIO_SID;
-const authToken = proccess.env.TWILIO_AUTH_TOKEN;
+const stripe = Stripe(process.env.STRIPE_TEST_SECRET_KEY)
+const accountSid = process.env.TWILIO_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = twilio(accountSid, authToken);
 
 const messagingServiceSid = 'MGc510e563f78cab9012e89a8c7ef3a620';
