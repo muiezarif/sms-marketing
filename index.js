@@ -46,7 +46,12 @@ const db_connect = async () => {
 }
 
 
-
+app.use(cors({
+    origin: "*",
+}));
+app.use(cookieParser())
+app.use(express.json())
+app.use(bodyParser.urlencoded({extended:true}))
 // Serve the static files from the upload folder
 app.use('/images', express.static(join(__dirname, 'images')));
 app.use('/contactfiles', express.static(join(__dirname, 'contactfiles')));
@@ -96,10 +101,5 @@ app.listen(process.env.PORT || 3030,"::", function(){
     app.use(adminBro.options.rootPath, router)
     // Middlewares
     // Allow requests from any origin
-    app.use(cors({
-        origin: "*",
-    }));
-    app.use(cookieParser())
-    app.use(express.json())
-    app.use(bodyParser.urlencoded({extended:true}))
+    
   });
