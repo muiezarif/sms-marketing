@@ -95,7 +95,10 @@ app.listen(process.env.PORT || 3030,"::", function(){
       })
     app.use(adminBro.options.rootPath, router)
     // Middlewares
-    app.use(cors())
+    // Allow requests from any origin
+    app.use(cors({
+        origin: "*",
+    }));
     app.use(cookieParser())
     app.use(express.json())
     app.use(bodyParser.urlencoded({extended:true}))
