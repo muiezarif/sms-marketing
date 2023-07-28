@@ -77,5 +77,17 @@ router.get("/get-inbound-messages/:userid",verifyUser,getInboundMessages)
 router.get("/get-subscription-detail/:userid",verifyUser,getUserSubscriptionDetail)
 router.get("/get-phone-subscription-detail/:userid",verifyUser,getUserPhoneSubscriptionDetail)
 router.get("/get-user/:username",getUserByUsername)
+// Route to handle incoming SMS messages
+router.post('/twiml', (req, res) => {
+     // Extract the SMS message content from the request
+    // Generate your desired TwiML response based on the received SMS message
+    const twimlResponse = `
+      <Response>
+        <Message>Thanks for your response. We will get back to you shortly</Message>
+      </Response>
+    `;
+    res.type('text/xml');
+    res.send(twimlResponse);
+  });
 
 export default router

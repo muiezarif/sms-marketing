@@ -54,6 +54,18 @@ const db_connect = async () => {
 app.get("/", (req,res) => {
     res.send("First request")
 })
+// Route to handle incoming SMS messages
+app.post('/reply/twiml', (req, res) => {
+    // Extract the SMS message content from the request
+   // Generate your desired TwiML response based on the received SMS message
+   const twimlResponse = `
+     <Response>
+       <Message>Thanks for your response. We will get back to you shortly</Message>
+     </Response>
+   `;
+   res.type('text/xml');
+   res.send(twimlResponse);
+ });
 app.listen(process.env.PORT || 3030,"::", function(){
     db_connect()
     console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);

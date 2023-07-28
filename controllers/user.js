@@ -146,8 +146,18 @@ export const getUserDashboardData = async (req,res,next) => {
         // console.log(user.twilio_phone_number)
         let successMessageLogs
         let failureMessageLogs
+        let subTwilioClient
         // Fetch the message logs for the specified phone number
-        await twilioClient.messages.list({ from: user.twilio_phone_number })
+        await twilioClient.api.accounts(user.twilio_sub_account).fetch()
+        .then(subaccount => {
+          console.log('Account SID:', subaccount.sid);
+          console.log('Auth Token:', subaccount.authToken);
+          subTwilioClient = twilio(subaccount.sid,subaccount.authToken)
+        })
+        .catch(error => {
+          console.error('Error fetching subaccount details:', error);
+        });
+        await subTwilioClient.messages.list({ from: user.twilio_phone_number })
         .then((messages) => {
           // Store the message logs in an array
           successMessageLogs = messages.filter((message) => message.status === 'delivered').map((message) => ({
@@ -175,6 +185,7 @@ export const getUserDashboardData = async (req,res,next) => {
           res.status(200).json({success:true,message:"Success",result:result, error:{}})
         
     } catch (error) {
+      console.log(error)
         res.status(200).json({success:false,message:"Failure",result:{},error:error})
     }
 }
@@ -473,6 +484,7 @@ export const subscribeToPlatform = async (req,res,next) => {
 export const getTwilioAvailablePhoneNumbers = async (req,res,next) => {
   try {
     // twilioClient.acc
+
     const numbers = await twilioClient.api.account.availablePhoneNumbers('US').local.list({ status: 'available' });
   
     res.status(200).json({success:true,message:"Success",result:numbers,error:{} });
@@ -483,9 +495,15 @@ export const getTwilioAvailablePhoneNumbers = async (req,res,next) => {
 }
 
 // Function to add a phone number to a messaging service
-async function addPhoneNumberToMessagingService(messagingServiceSid, phoneNumberSid) {
+async function addPhoneNumberToMessagingService(req,phoneNumberSid,subTwilioClient) {
   try {
-    const number = await twilioClient.messaging
+    const twimlWebhookUrl = `${req.protocol}://${req.hostname}/reply/twiml`
+    const messagingService = await subTwilioClient.messaging.services.create({
+      friendlyName: 'Reply SMS',
+      inboundRequestUrl: twimlWebhookUrl, // Specify a name for your Messaging Service
+    });
+    const messagingServiceSid = messagingService.sid; // Store the Messaging Service SID for future use
+    const number = await subTwilioClient.messaging
       .services(messagingServiceSid)
       .phoneNumbers.create({
         phoneNumberSid: phoneNumberSid,
@@ -565,7 +583,12 @@ export const buyTwilioPhoneNumber = async (req,res,next) => {
             // Payment successful
             
             try {
-              const purchasedNumber = await twilioClient.incomingPhoneNumbers.create({ phoneNumber:req.body.phoneNumber });
+              // Fetch the subaccount details using the Twilio API
+    const subaccount = await twilioClient.api.accounts(req.body.subAccount).fetch();
+
+    // Create a new Twilio client using the subaccount credentials
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
+              const purchasedNumber = await subTwilioClient.incomingPhoneNumbers.create({ phoneNumber:req.body.phoneNumber });
                 console.log("purchased number")
                 console.log(purchasedNumber)
                 const boughtPhoneNumber = new BoughtPhoneNumbers({
@@ -574,8 +597,8 @@ export const buyTwilioPhoneNumber = async (req,res,next) => {
                 })
                 boughtPhoneNumber.save()
                 await User.findByIdAndUpdate(req.body.userId, {$set: {twilio_phone_number:req.body.phoneNumber,twilio_phone_subscribed:true}},{new:true})
-                addPhoneNumberToMessagingService(messagingServiceSid,purchasedNumber.sid)
-                enableSmsCapabilities(purchasedNumber.sid)
+                addPhoneNumberToMessagingService(req,purchasedNumber.sid,subTwilioClient)
+                enableSmsCapabilities(req,purchasedNumber.sid,subTwilioClient)
                 let newSubscription
                 const checkSubscription = await PhoneSubscription.findOne({user:req.body.userId})
                 if(checkSubscription){
@@ -617,16 +640,34 @@ export const buyTwilioPhoneNumber = async (req,res,next) => {
   }
 }
 // Function to enable SMS capabilities for a phone number
-const enableSmsCapabilities = async (phoneNumber) => {
+const enableSmsCapabilities = async (req,phoneNumber,subTwilioClient) => {
   try {
-    const incomingPhoneNumber = await twilioClient.incomingPhoneNumbers(phoneNumber).fetch();
-    const updatedPhoneNumber = await incomingPhoneNumber.update({
-      smsUrl: 'https://handler.twilio.com/twiml/EHec5a12d544310ef7decd355821efd92b', // Specify your desired SMS webhook URL here
-    });
-    console.log(`SMS capabilities enabled for phone number ${phoneNumber}`);
-    console.log(updatedPhoneNumber);
+        
+    
+          // Fetch the incoming phone number and update SMS capabilities with dynamic TwiML URL
+          const incomingPhoneNumber = await subTwilioClient.incomingPhoneNumbers(phoneNumber).fetch();
+          const twimlWebhookUrl = `${req.protocol}://${req.hostname}/reply/twiml`
+          const updatedPhoneNumber = await incomingPhoneNumber.update({
+            smsUrl: twimlWebhookUrl,
+          });
+    
+          console.log(`SMS capabilities enabled for phone number ${phoneNumber}`);
+          console.log('TwiML Bin URL:', twiMLBinUrl);
+          console.log('Updated phone number details:', updatedPhoneNumber);
+        
   } catch (error) {
     console.error('Error enabling SMS capabilities:', error);
+  }
+};
+// Function to create a TwiML Bin
+const createTwiMLBin = async (subTwilioClient,twiml) => {
+  try {
+    
+    const twiMLBin = await subTwilioClient.twiml.v1.bins.create({ code: twiml });
+    return twiMLBin.sid;
+  } catch (error) {
+    console.error('Error creating TwiML Bin:', error);
+    return null;
   }
 };
 export const sendSms = async (req, res, next) => {
@@ -640,6 +681,11 @@ export const sendSms = async (req, res, next) => {
     let availableSmsCount = user.available_sms;
     const dataPromises = [];
 
+    // Fetch the subaccount details for the user
+    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
+
 
     console.log(availableSmsCount)
     fs.createReadStream(contactFile)
@@ -648,7 +694,7 @@ export const sendSms = async (req, res, next) => {
         const phoneNumber = data.phone_number;
 
 
-        const promise = twilioClient.messages
+        const promise = subTwilioClient.messages
         .create({
           body: smsMessage,
           from: userTwilioPhone,
@@ -737,7 +783,11 @@ export const getFailureMessages = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userid)
     let failureMessageLogs
-    await twilioClient.messages.list({ from: user.twilio_phone_number })
+    // Fetch the subaccount details for the user
+    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
+    await subTwilioClient.messages.list({ from: user.twilio_phone_number })
         .then((messages) => {
           // Store the message logs in an array
 
@@ -766,7 +816,11 @@ export const getSuccessMessages = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userid)
     let successMessageLogs
-    await twilioClient.messages.list({ from: user.twilio_phone_number })
+    // Fetch the subaccount details for the user
+    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
+    await subTwilioClient.messages.list({ from: user.twilio_phone_number })
         .then((messages) => {
           // Store the message logs in an array
 
@@ -793,7 +847,11 @@ export const getInboundMessages = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userid)
     let successMessageLogs
-    await twilioClient.messages.list({ to: user.twilio_phone_number })
+    // Fetch the subaccount details for the user
+    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
+    await subTwilioClient.messages.list({ to: user.twilio_phone_number })
         .then((messages) => {
           // Store the message logs in an array
 
@@ -821,7 +879,11 @@ export const getReportsLogs = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userid)
     let successMessageLogs
-    await twilioClient.messages.list({ from: user.twilio_phone_number })
+    // Fetch the subaccount details for the user
+    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
+    await subTwilioClient.messages.list({ from: user.twilio_phone_number })
         .then((messages) => {
           // Store the message logs in an array
 
@@ -872,6 +934,10 @@ export const sendSingleSms = async (req, res, next) => {
     // Get the user's available_sms value
     const user = await User.findById(userId);
     let availableSmsCount = user.available_sms;
+    // Fetch the subaccount details for the user
+    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+
+    const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
 
     // Check if the user has available SMS credits
     if (availableSmsCount <= 0) {
@@ -879,7 +945,7 @@ export const sendSingleSms = async (req, res, next) => {
     }
 
     // Send the SMS using Twilio
-    const smsResult = await twilioClient.messages.create({
+    const smsResult = await subTwilioClient.messages.create({
       body: smsMessage,
       from: userTwilioPhone,
       to: toPhone
