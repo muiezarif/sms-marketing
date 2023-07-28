@@ -46,25 +46,7 @@ const db_connect = async () => {
 }
 
 
-app.use(cors({
-    origin: "*",
-}));
-app.use(cookieParser())
-app.use(express.json())
 
-// Serve the static files from the upload folder
-app.use('/images', express.static(join(__dirname, 'images')));
-app.use('/contactfiles', express.static(join(__dirname, 'contactfiles')));
-app.use("/api/auth", authRoute)
-app.use("/api/users", userRoute)
-app.use("/api/artists", userRoute)
-app.use("/api/businesses", userRoute)
-
-app.use((err,req,res,next) => {
-    const errorStatus = err.status || 500
-    const errorMessage = err.message || "Something went wrong!"
-    return res.status(200).json({success:false,message:errorMessage,result:{},error:err})
-})
 
 
 
@@ -99,7 +81,25 @@ app.listen(process.env.PORT || 3030,"::", function(){
     },
       })
     app.use(adminBro.options.rootPath, router)
+    app.use(cors({
+        origin: "*",
+    }));
+    app.use(cookieParser())
+    app.use(express.json())
     app.use(bodyParser.urlencoded({extended:true}))
+    // Serve the static files from the upload folder
+    app.use('/images', express.static(join(__dirname, 'images')));
+    app.use('/contactfiles', express.static(join(__dirname, 'contactfiles')));
+    app.use("/api/auth", authRoute)
+    app.use("/api/users", userRoute)
+    app.use("/api/artists", userRoute)
+    app.use("/api/businesses", userRoute)
+    
+    app.use((err,req,res,next) => {
+        const errorStatus = err.status || 500
+        const errorMessage = err.message || "Something went wrong!"
+        return res.status(200).json({success:false,message:errorMessage,result:{},error:err})
+    })
     // Middlewares
     // Allow requests from any origin
     
