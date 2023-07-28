@@ -10,11 +10,13 @@ import BoughtPhoneNumbers from "../models/BoughtPhoneNumbers.js"
 import PhoneNumberBuyingFailureReport from "../models/PhoneNumberBuyingFailureReport.js"
 import cron from "node-cron"
 import PhoneSubscription from "../models/PhoneSubscription.js"
+import dotenv from "dotenv"
+dotenv.config();
 // const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
 // const stripe = Stripe("sk_live_OKIox1szlbVdrY8ODbX62vf900FYE9MyGb")
-const stripe = Stripe("sk_test_4CgRjsXz5H9ntyJSCZ7bCC2400JmmfIpy0")
-const accountSid = 'AC2f28d3f2d95a1a3475e346758469ed19';
-const authToken = '059773b0fed00286d9cd155b261e6815';
+const stripe = Stripe(proccess.env.STRIPE_TEST_SECRET_KEY)
+const accountSid = proccess.env.TWILIO_SID;
+const authToken = proccess.env.TWILIO_AUTH_TOKEN;
 const twilioClient = twilio(accountSid, authToken);
 
 const messagingServiceSid = 'MGc510e563f78cab9012e89a8c7ef3a620';
