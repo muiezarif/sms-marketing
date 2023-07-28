@@ -35,7 +35,7 @@ export const updateUser = async (req,res,next) => {
     try {
         // console.log(req.file)
         if(req.file){
-          const filePath = `${req.protocol}://${req.hostname}:${req.socket.localPort}/`+req.file.path
+          const filePath = `${req.protocol}://${req.hostname}/`+req.file.path
           const updatedUser = await User.findByIdAndUpdate(req.params.id, {$set: req.body,$set:{img:filePath,img_path:req.file.destination}},{new:true})
           res.status(200).json({success:true,message:"Success",result:updatedUser, error:{}})  
         }else{
