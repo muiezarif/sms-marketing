@@ -51,7 +51,7 @@ app.use(cors({
 }));
 app.use(cookieParser())
 app.use(express.json())
-app.use(bodyParser.urlencoded({extended:true}))
+
 // Serve the static files from the upload folder
 app.use('/images', express.static(join(__dirname, 'images')));
 app.use('/contactfiles', express.static(join(__dirname, 'contactfiles')));
@@ -99,6 +99,7 @@ app.listen(process.env.PORT || 3030,"::", function(){
     },
       })
     app.use(adminBro.options.rootPath, router)
+    app.use(bodyParser.urlencoded({extended:true}))
     // Middlewares
     // Allow requests from any origin
     
