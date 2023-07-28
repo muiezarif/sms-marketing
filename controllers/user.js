@@ -646,7 +646,7 @@ const enableSmsCapabilities = async (req,phoneNumber,subTwilioClient) => {
     
           // Fetch the incoming phone number and update SMS capabilities with dynamic TwiML URL
           const incomingPhoneNumber = await subTwilioClient.incomingPhoneNumbers(phoneNumber).fetch();
-          const twimlWebhookUrl = `${req.protocol}://${req.hostname}/reply/twiml`
+          const twimlWebhookUrl = `https://${req.hostname}/reply/twiml`
           const updatedPhoneNumber = await incomingPhoneNumber.update({
             smsUrl: twimlWebhookUrl,
           });
