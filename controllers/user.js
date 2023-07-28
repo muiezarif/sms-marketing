@@ -652,7 +652,7 @@ const enableSmsCapabilities = async (req,phoneNumber,subTwilioClient) => {
           });
     
           console.log(`SMS capabilities enabled for phone number ${phoneNumber}`);
-          console.log('TwiML Bin URL:', twiMLBinUrl);
+          // console.log('TwiML Bin URL:', twiMLBinUrl);
           console.log('Updated phone number details:', updatedPhoneNumber);
         
   } catch (error) {
@@ -682,7 +682,7 @@ export const sendSms = async (req, res, next) => {
     const dataPromises = [];
 
     // Fetch the subaccount details for the user
-    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+    const subaccount = await twilioClient.api.accounts(user.twilio_sub_account).fetch();
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
 
@@ -784,7 +784,7 @@ export const getFailureMessages = async (req, res, next) => {
     const user = await User.findById(req.params.userid)
     let failureMessageLogs
     // Fetch the subaccount details for the user
-    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+    const subaccount = await twilioClient.api.accounts(user.twilio_sub_account).fetch();
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
     await subTwilioClient.messages.list({ from: user.twilio_phone_number })
@@ -817,7 +817,7 @@ export const getSuccessMessages = async (req, res, next) => {
     const user = await User.findById(req.params.userid)
     let successMessageLogs
     // Fetch the subaccount details for the user
-    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+    const subaccount = await twilioClient.api.accounts(user.twilio_sub_account).fetch();
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
     await subTwilioClient.messages.list({ from: user.twilio_phone_number })
@@ -848,7 +848,7 @@ export const getInboundMessages = async (req, res, next) => {
     const user = await User.findById(req.params.userid)
     let successMessageLogs
     // Fetch the subaccount details for the user
-    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+    const subaccount = await twilioClient.api.accounts(user.twilio_sub_account).fetch();
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
     await subTwilioClient.messages.list({ to: user.twilio_phone_number })
@@ -880,7 +880,7 @@ export const getReportsLogs = async (req, res, next) => {
     const user = await User.findById(req.params.userid)
     let successMessageLogs
     // Fetch the subaccount details for the user
-    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+    const subaccount = await twilioClient.api.accounts(user.twilio_sub_account).fetch();
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
     await subTwilioClient.messages.list({ from: user.twilio_phone_number })
@@ -935,7 +935,7 @@ export const sendSingleSms = async (req, res, next) => {
     const user = await User.findById(userId);
     let availableSmsCount = user.available_sms;
     // Fetch the subaccount details for the user
-    const subaccount = await twilioClient.accounts(user.twilio_sub_account).fetch();
+    const subaccount = await twilioClient.api.accounts(user.twilio_sub_account).fetch();
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
 
