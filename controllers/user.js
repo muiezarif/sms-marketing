@@ -502,6 +502,7 @@ export const getTwilioAvailablePhoneNumbersByFilter = async (req, res, next) => 
     const filters = {
       status: 'available',
       areaCode:req.body.areaCode,
+      contains:req.body.contains
       // Add more filters here if needed
     };
 
