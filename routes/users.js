@@ -1,5 +1,5 @@
 import express from "express";
-import { addUserContactToFile, addUserContactToPublicFile, buySmsBundle, buyTwilioPhoneNumber, cancelPhoneSubscriptionToPlatform, cancelSubscriptionToPlatform, deleteUser, editUserContactFromFile, getAllUserContactFiles, getAllUsers, getFailureMessages, getInboundMessages, getPaginatedUserContactsFromFile, getPaymentClientSecret, getReportsLogs, getTwilioAvailablePhoneNumbers, getUser, getUserByUsername, getUserContactsFromFile, getUserDashboardData, getUserPhoneSubscriptionDetail, getUserSubscriptionDetail, removeUserContactFromFile, resubscribePhoneNumber, sendSingleSms, sendSms, subscribeToPlatform, updateUser, uploadContactFile } from "../controllers/user.js";
+import { addUserContactToFile, addUserContactToPublicFile, buySmsBundle, buyTwilioPhoneNumber, cancelPhoneSubscriptionToPlatform, cancelSubscriptionToPlatform, deleteUser, editUserContactFromFile, getAllUserContactFiles, getAllUsers, getFailureMessages, getInboundMessages, getPaginatedUserContactsFromFile, getPaymentClientSecret, getReportsLogs, getTwilioAvailablePhoneNumbers, getTwilioAvailablePhoneNumbersByFilter, getUser, getUserByUsername, getUserContactsFromFile, getUserDashboardData, getUserPhoneSubscriptionDetail, getUserSubscriptionDetail, removeUserContactFromFile, resubscribePhoneNumber, sendSingleSms, sendSms, subscribeToPlatform, updateUser, uploadContactFile } from "../controllers/user.js";
 import { verifyUser } from "../utils/verifyToken.js";
 import multer from "multer"
 import path from "path"
@@ -67,6 +67,7 @@ router.post("/platform-subscription",verifyUser,subscribeToPlatform)
 router.post("/cancel-platform-subscription",verifyUser,cancelSubscriptionToPlatform)
 router.post("/cancel-phone-subscription",verifyUser,cancelPhoneSubscriptionToPlatform)
 router.get("/twilio/get-phone-numbers",verifyUser,getTwilioAvailablePhoneNumbers)
+router.post("/twilio/get-phone-numbers",verifyUser,getTwilioAvailablePhoneNumbersByFilter)
 router.post("/twilio/buy-phone-number",verifyUser,buyTwilioPhoneNumber)
 router.post("/twilio/resubscribe-phone-number",verifyUser,resubscribePhoneNumber)
 router.post("/send-sms",verifyUser,sendSms)

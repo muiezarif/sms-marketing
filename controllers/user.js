@@ -494,6 +494,40 @@ export const getTwilioAvailablePhoneNumbers = async (req,res,next) => {
   }
 }
 
+export const getTwilioAvailablePhoneNumbersByFilter = async (req, res, next) => {
+  try {
+    const countryCode = 'US';
+
+    // Define the filters you want to apply
+    const filters = {
+      status: 'available',
+      areaCode:req.body.areaCode,
+      // Add more filters here if needed
+    };
+
+    // Fetch available phone numbers with the specified filters
+    const numbers = await twilioClient.api.account
+      .availablePhoneNumbers(countryCode)
+      .local.list(filters);
+
+    
+
+    res.status(200).json({
+      success: true,
+      message: 'Success',
+      result: numbers,
+      error: {},
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(200).json({
+      success: false,
+      message: 'Failure',
+      result: {},
+      error: error,
+    });
+  }
+};
 // Function to add a phone number to a messaging service
 async function addPhoneNumberToMessagingService(req,phoneNumberSid,subTwilioClient) {
   try {
