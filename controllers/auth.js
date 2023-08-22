@@ -36,7 +36,7 @@ const sendResetPasswordEmail = async (req,name,email,token) => {
             from:"q1034412@gmail.com",
             to:email,
             subject:"Reset Password",
-            html:"<p> Hi "+ name+ ", Please Go to the <a href="+`http://localhost:3000/`+"reset-password?token="+token+">link<a/> and reset your password</p>"
+            html:"<p> Hi "+ name+ ", Please Go to the <a href="+`https://my.digitvl.com/`+"reset-password?token="+token+">link<a/> and reset your password</p>"
         }
 
         transporter.sendMail(mailOptions,function(error,info){
