@@ -67,12 +67,17 @@ export const getUser = async (req,res,next) => {
     }
 }
 
-export const getUserByUsername = async (req,res,next) => {
+export const getUserByUsername = async (req, res, next) => {
   try {
-      const user = await User.findOne({username:req.params.username})
-      res.status(200).json({success:true,message:"Success",result:user, error:{}})    
+    const user = await User.findOne({ username: { $regex: new RegExp('^' + req.params.username, 'i') } });
+    if (!user) {
+      // Handle case where no user is found
+      res.status(404).json({ success: false, message: "User not found", result: {}, error: {} });
+      return;
+    }
+    res.status(200).json({ success: true, message: "Success", result: user, error: {} });
   } catch (error) {
-      res.status(200).json({success:false,message:"Failure",result:{},error:error})
+    res.status(500).json({ success: false, message: "Failure", result: {}, error: error });
   }
 }
 
@@ -721,14 +726,14 @@ export const sendSms = async (req, res, next) => {
 
     const subTwilioClient = twilio(subaccount.sid, subaccount.authToken);
 
-
+    // const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     console.log(availableSmsCount)
     fs.createReadStream(contactFile)
       .pipe(csvParser())
-      .on('data', (data) => {
+      .on('data', async(data) => {
         const phoneNumber = data.phone_number;
 
-
+        // await delay(1000);
         const promise = subTwilioClient.messages
         .create({
           body: smsMessage,
