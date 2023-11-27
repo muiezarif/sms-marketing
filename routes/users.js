@@ -1,5 +1,5 @@
 import express from "express";
-import { addUserContactToFile, addUserContactToPublicFile, buySmsBundle, buyTwilioPhoneNumber, cancelPhoneSubscriptionToPlatform, cancelSubscriptionToPlatform, deleteUser, editUserContactFromFile, getAllUserContactFiles, getAllUsers, getFailureMessages, getInboundMessages, getPaginatedUserContactsFromFile, getPaymentClientSecret, getReportsLogs, getTwilioAvailablePhoneNumbers, getTwilioAvailablePhoneNumbersByFilter, getUser, getUserByUsername, getUserContactsFromFile, getUserDashboardData, getUserPhoneSubscriptionDetail, getUserSubscriptionDetail, removeUserContactFromFile, resubscribePhoneNumber, sendSingleSms, sendSms, subscribeToPlatform, updateUser, uploadContactFile } from "../controllers/user.js";
+import { addUserContactToFile, addUserContactToPublicFile, buySmsBundle, buyTwilioPhoneNumber, cancelPhoneSubscriptionToPlatform, cancelSubscriptionToPlatform, deleteUser, editUserContactFromFile, getAllUserContactFiles, getAllUsers, getFailureMessages, getInboundMessages, getPaginatedUserContactsFromFile, getPaymentClientSecret, getReportsLogs, getTwilioAvailablePhoneNumbers, getTwilioAvailablePhoneNumbersByFilter, getUser, getUserByUsername, getUserContactsFromFile, getUserDashboardData, getUserPhoneSubscriptionDetail, getUserSubscriptionDetail, registerBusiness, removeUserContactFromFile, resubscribePhoneNumber, sendSingleSms, sendSms, subscribeToPlatform, updateUser, uploadContactFile } from "../controllers/user.js";
 import { verifyUser } from "../utils/verifyToken.js";
 import multer from "multer"
 import path from "path"
@@ -57,7 +57,7 @@ router.get("/get-dashboard-details/:userid",verifyUser,getUserDashboardData)
 router.get("/get-user-info/:id",verifyUser,getUser)
 router.put("/update-user-info/:id",verifyUser,imageUpload.single('images'),updateUser)
 router.get("/get-contacts-from-file/:id",verifyUser,getUserContactsFromFile)
-router.get("/get-contacts-from-file/:id/:page",verifyUser,getPaginatedUserContactsFromFile)
+router.get("/get-contacts-from-file/:userid/:id/:page",verifyUser,getPaginatedUserContactsFromFile)
 router.post("/add-contact-to-file/:id",verifyUser,addUserContactToFile)
 router.post("/add-contact-to-public-file",addUserContactToPublicFile)
 router.post("/edit-contact-from-file/:id",verifyUser,editUserContactFromFile)
@@ -78,6 +78,7 @@ router.get("/get-inbound-messages/:userid",verifyUser,getInboundMessages)
 router.get("/get-subscription-detail/:userid",verifyUser,getUserSubscriptionDetail)
 router.get("/get-phone-subscription-detail/:userid",verifyUser,getUserPhoneSubscriptionDetail)
 router.get("/get-user/:username",getUserByUsername)
+router.post("/register-user-business/",verifyUser,registerBusiness)
 // Route to handle incoming SMS messages
 router.post('/twiml', (req, res) => {
      // Extract the SMS message content from the request
